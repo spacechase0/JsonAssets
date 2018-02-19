@@ -13,9 +13,6 @@ namespace JsonAssets.Data
     public class BigCraftableData : DataNeedsId
     {
         [JsonIgnore]
-        internal string directory;
-
-        [JsonIgnore]
         internal Texture2D texture;
 
         public class Recipe_
