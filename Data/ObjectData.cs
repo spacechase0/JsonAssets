@@ -13,9 +13,6 @@ namespace JsonAssets.Data
     public class ObjectData : DataNeedsId
     {
         [JsonIgnore]
-        internal string directory;
-
-        [JsonIgnore]
         internal Texture2D texture;
         [JsonIgnore]
         internal Texture2D textureColor;

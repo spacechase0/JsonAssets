@@ -46,7 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContentInjector.cs" />
-    <Compile Include="Data\ContentPackData.cs" />
+    <Compile Include="Data\ContentPack.cs" />
+    <Compile Include="Data\LegacyManifest.cs" />
     <Compile Include="Data\FruitTreeData.cs" />
     <Compile Include="Data\CropData.cs" />
     <Compile Include="Data\DataNeedsId.cs" />

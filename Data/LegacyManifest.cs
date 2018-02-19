@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace JsonAssets.Data
 {
-    public class ContentPackData
+    public class LegacyManifest
     {
         public string Name { get; set; }
         public string Description { get; set; }
