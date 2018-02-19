@@ -28,7 +28,7 @@ namespace JsonAssets
 
             // load content packs
             Log.info("Checking content packs...");
-            foreach (ContentPack contentPack in this.GetContentPacks())
+            foreach (ContentPack contentPack in this.GetStandardContentPacks().Concat(this.GetLegacyContentPacks()))
             {
                 Log.info($"\t{contentPack.Name} {contentPack.Version} by {contentPack.Author} - {contentPack.Description}");
 
@@ -50,10 +50,124 @@ namespace JsonAssets
 
             // add content injector
             helper.Content.AssetEditors.Add(new ContentInjector());
-
         }
 
-        private IEnumerable<ContentPack> GetContentPacks()
+        /// <summary>Get content packs loaded through SMAPI.</summary>
+        private IEnumerable<ContentPack> GetStandardContentPacks()
+        {
+            foreach(IContentPack contentPack in this.Helper.GetContentPacks())
+            {
+                // prepare metadata
+                IManifest manifest = contentPack.Manifest;
+                string dir = contentPack.DirectoryPath;
+                ContentPack data = new ContentPack(manifest.Name, manifest.Description, manifest.Author, manifest.Version.ToString(), manifest.UpdateKeys);
+
+                // read objects
+                if (Directory.Exists(Path.Combine(contentPack.DirectoryPath, "Objects")))
+                {
+                    foreach (string objDir in Directory.EnumerateDirectories(Path.Combine(dir, "Objects")))
+                    {
+                        if (!File.Exists(Path.Combine(objDir, "object.json")))
+                            continue;
+
+                        string relativeDir = Path.Combine("Objects", Path.GetFileName(objDir));
+                        ObjectData obj = contentPack.ReadJsonFile<ObjectData>(Path.Combine(relativeDir, "object.json"));
+                        obj.texture = contentPack.LoadAsset<Texture2D>($"{relativeDir}/object.png");
+                        if ( obj.IsColored )
+                            obj.textureColor = contentPack.LoadAsset<Texture2D>($"{relativeDir}/color.png");
+
+                        data.Objects.Add(obj);
+                    }
+                }
+
+                // read crops
+                if (Directory.Exists(Path.Combine(dir, "Crops")))
+                {
+                    foreach (string cropDir in Directory.EnumerateDirectories(Path.Combine(dir, "Crops")))
+                    {
+                        if (!File.Exists(Path.Combine(cropDir, "crop.json")))
+                            continue;
+
+                        string relativeDir = Path.Combine("Crops", Path.GetFileName(cropDir));
+                        CropData crop = contentPack.ReadJsonFile<CropData>(Path.Combine(relativeDir, "crop.json"));
+                        crop.texture = contentPack.LoadAsset<Texture2D>($"{relativeDir}/crop.png");
+                        data.Crops.Add(crop);
+
+                        var obj = new ObjectData
+                        {
+                            texture = contentPack.LoadAsset<Texture2D>($"{relativeDir}/seeds.png"),
+                            Name = crop.SeedName,
+                            Description = crop.SeedDescription,
+                            Category = ObjectData.Category_.Seeds,
+                            Price = crop.SeedPurchasePrice,
+                            CanPurchase = true,
+                            PurchaseFrom = crop.SeedPurchaseFrom,
+                            PurchasePrice = crop.SeedPurchasePrice,
+                            PurchaseRequirements = crop.SeedPurchaseRequirements ?? new List<string>()
+                        };
+
+                        string[] excludeSeasons = new [] { "spring", "summer", "fall", "winter" }.Except(crop.Seasons).ToArray();
+                        var str = $"z {string.Join(" ", excludeSeasons)}".Trim();
+                        obj.PurchaseRequirements.Add(str);
+
+                        crop.seed = obj;
+
+                        data.Objects.Add(obj);
+                    }
+                }
+
+                // read fruit trees
+                if (Directory.Exists(Path.Combine(dir, "FruitTrees")))
+                {
+                    foreach (string fruitTreeDir in Directory.EnumerateDirectories(Path.Combine(dir, "FruitTrees")))
+                    {
+                        if (!File.Exists(Path.Combine(fruitTreeDir, "tree.json")))
+                            continue;
+
+                        string relativeDir = Path.Combine("FruitTrees", Path.GetFileName(fruitTreeDir));
+                        FruitTreeData fruitTree = contentPack.ReadJsonFile<FruitTreeData>(Path.Combine(relativeDir, "tree.json"));
+                        fruitTree.texture = contentPack.LoadAsset<Texture2D>($"{relativeDir}/tree.png");
+                        data.FruitTrees.Add(fruitTree);
+
+                        ObjectData obj = new ObjectData
+                        {
+                            texture = contentPack.LoadAsset<Texture2D>($"{relativeDir}/sapling.png"),
+                            Name = fruitTree.SaplingName,
+                            Description = fruitTree.SaplingDescription,
+                            Category = ObjectData.Category_.Seeds,
+                            Price = fruitTree.SaplingPurchasePrice,
+                            CanPurchase = true,
+                            PurchaseFrom = fruitTree.SsaplingPurchaseFrom,
+                            PurchasePrice = fruitTree.SaplingPurchasePrice
+                        };
+                        
+                        fruitTree.sapling = obj;
+
+                        data.Objects.Add(obj);
+                    }
+                }
+
+                // read bigcraftables
+                if (Directory.Exists(Path.Combine(dir, "BigCraftables")))
+                {
+                    foreach (string bigDir in Directory.EnumerateDirectories(Path.Combine(dir, "BigCraftables")))
+                    {
+                        if (!File.Exists(Path.Combine(bigDir, "big-craftable.json")))
+                            continue;
+
+                        string relativeDir = Path.Combine("BigCraftables", Path.GetFileName(bigDir));
+                        BigCraftableData bigInfo = contentPack.ReadJsonFile<BigCraftableData>(Path.Combine(relativeDir, "big-craftable.json"));
+                        bigInfo.texture = contentPack.LoadAsset<Texture2D>($"{relativeDir}/big-craftable.png");
+                        data.BigCraftables.Add(bigInfo);
+                    }
+                }
+
+                yield return data;
+            }
+        }
+
+        /// <summary>Get content packs in the older format from the mod's ContentPacks folder.</summary>
+        private IEnumerable<ContentPack> GetLegacyContentPacks()
         {
             foreach (string dir in Directory.EnumerateDirectories(Path.Combine(Helper.DirectoryPath, "ContentPacks")))
             {
