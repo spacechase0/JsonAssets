@@ -485,38 +485,38 @@ namespace JsonAssets
         {
             if (loc is FarmHouse fh)
             {
-                if (fh.fridge != null && fh.fridge.items != null)
-                    fixItemList(fh.fridge.items);
+                if (fh.fridge != null && fh.fridge.Value.items != null)
+                    fixItemList(fh.fridge.Value.items);
             }
 
             IList<Vector2> toRemove = new List<Vector2>();
             foreach ( var tf in loc.terrainFeatures )
             {
-                if ( tf.Value is HoeDirt hd )
+                if ( tf.First().Value is HoeDirt hd )
                 {
                     if (hd.crop == null)
                         continue;
 
-                    if (fixId(oldCropIds, cropIds, ref hd.crop.rowInSpriteSheet, Game1.content.Load<Dictionary<int, string>>("Data\\Crops")))
+                    if (fixId(oldCropIds, cropIds, hd.crop.rowInSpriteSheet, Game1.content.Load<Dictionary<int, string>>("Data\\Crops")))
                         hd.crop = null;
                     else
                     {
                         var key = cropIds.FirstOrDefault(x => x.Value == hd.crop.rowInSpriteSheet).Key;
                         var c = crops.FirstOrDefault(x => x.Name == key);
                         if ( c != null ) // Non-JA crop
-                            hd.crop.indexOfHarvest = ResolveObjectId(c.Product);
+                            hd.crop.indexOfHarvest.Value = ResolveObjectId(c.Product);
                     }
                 }
-                else if ( tf.Value is FruitTree ft )
+                else if ( tf.First().Value is FruitTree ft )
                 {
-                    if (fixId(oldFruitTreeIds, fruitTreeIds, ref ft.treeType, Game1.content.Load<Dictionary<int, string>>("Data\\fruitTrees")))
-                        toRemove.Add(tf.Key);
+                    if (fixId(oldFruitTreeIds, fruitTreeIds, ft.treeType, Game1.content.Load<Dictionary<int, string>>("Data\\fruitTrees")))
+                        toRemove.Add(tf.First().Key);
                     else
                     {
                         var key = oldFruitTreeIds.FirstOrDefault(x => x.Value == ft.treeType).Key;
                         var ftt = fruitTrees.FirstOrDefault(x => x.Name == key);
                         if ( ftt != null ) // Non-JA fruit tree
-                            ft.indexOfFruit = ResolveObjectId(ftt.Product);
+                            ft.indexOfFruit.Value = ResolveObjectId(ftt.Product);
                     }
                 }
             }
@@ -526,28 +526,28 @@ namespace JsonAssets
             toRemove.Clear();
             foreach ( var obj in loc.objects )
             {
-                if ( obj.Value is Chest chest )
+                if ( obj.First().Value is Chest chest )
                 {
                     fixItemList(chest.items);
                 }
                 else
                 {
-                    if (!obj.Value.bigCraftable)
+                    if (!obj.First().Value.bigCraftable)
                     {
-                        if (fixId(oldObjectIds, objectIds, ref obj.Value.parentSheetIndex, Game1.objectInformation))
-                            toRemove.Add(obj.Key);
+                        if (fixId(oldObjectIds, objectIds, obj.First().Value.parentSheetIndex, Game1.objectInformation))
+                            toRemove.Add(obj.First().Key);
                     }
                     else
                     {
-                        if (fixId(oldBigCraftableIds, bigCraftableIds, ref obj.Value.parentSheetIndex, Game1.bigCraftablesInformation))
-                            toRemove.Add(obj.Key);
+                        if (fixId(oldBigCraftableIds, bigCraftableIds, obj.First().Value.parentSheetIndex, Game1.bigCraftablesInformation))
+                            toRemove.Add(obj.First().Key);
                     }
                 }
                 
-                if ( obj.Value.heldObject != null )
+                if ( obj.First().Value.heldObject.Value != null )
                 {
-                    if (fixId(oldObjectIds, objectIds, ref obj.Value.heldObject.parentSheetIndex, Game1.objectInformation))
-                        obj.Value.heldObject = null;
+                    if (fixId(oldObjectIds, objectIds, obj.First().Value.heldObject.First().parentSheetIndex, Game1.objectInformation))
+                        obj.First().Value.heldObject.Value = null;
                 }
             }
             foreach (var rem in toRemove)
@@ -559,7 +559,7 @@ namespace JsonAssets
                         fixLocation(building.indoors);
         }
 
-        private void fixItemList( List< Item > items )
+        private void fixItemList( Netcode.NetObjectList< Item > items )
         {
             var Game1hats = Game1.content.Load<Dictionary<int, string>>("Data\\hats");
             for ( int i = 0; i < items.Count; ++i )
@@ -569,18 +569,18 @@ namespace JsonAssets
                 {
                     if (!obj.bigCraftable)
                     {
-                        if (fixId(oldObjectIds, objectIds, ref obj.parentSheetIndex, Game1.objectInformation))
+                        if (fixId(oldObjectIds, objectIds, obj.parentSheetIndex, Game1.objectInformation))
                             items[i] = null;
                     }
                     else
                     {
-                        if (fixId(oldBigCraftableIds, bigCraftableIds, ref obj.parentSheetIndex, Game1.bigCraftablesInformation))
+                        if (fixId(oldBigCraftableIds, bigCraftableIds, obj.parentSheetIndex, Game1.bigCraftablesInformation))
                             items[i] = null;
                     }
                 }
                 else if ( item is Hat hat )
                 {
-                    if (fixId(oldHatIds, hatIds, ref hat.which, Game1hats))
+                    if (fixId(oldHatIds, hatIds, hat.which, Game1hats))
                         items[i] = null;
                 }
             }
@@ -588,7 +588,7 @@ namespace JsonAssets
 
         // Return true if the item should be deleted, false otherwise.
         // Only remove something if old has it but not new
-        private bool fixId(IDictionary<string, int> oldIds, IDictionary<string, int> newIds, ref int id, Dictionary<int, string> origData )
+        private bool fixId(IDictionary<string, int> oldIds, IDictionary<string, int> newIds, Netcode.NetInt id, IDictionary<int, string> origData )
         {
             if (origData.ContainsKey(id))
                 return false;
@@ -600,7 +600,7 @@ namespace JsonAssets
 
                 if (newIds.ContainsKey(key))
                 {
-                    id = newIds[key];
+                    id.Value = newIds[key];
                     return false;
                 }
                 else return true;
