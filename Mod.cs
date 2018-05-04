@@ -492,31 +492,34 @@ namespace JsonAssets
             IList<Vector2> toRemove = new List<Vector2>();
             foreach ( var tf in loc.terrainFeatures )
             {
-                if ( tf.First().Value is HoeDirt hd )
+                if (tf.Count > 0)
                 {
-                    if (hd.crop == null)
-                        continue;
+                    if (tf.First().Value is HoeDirt hd)
+                    {
+                        if (hd.crop == null)
+                            continue;
 
-                    if (fixId(oldCropIds, cropIds, hd.crop.rowInSpriteSheet, Game1.content.Load<Dictionary<int, string>>("Data\\Crops")))
-                        hd.crop = null;
-                    else
-                    {
-                        var key = cropIds.FirstOrDefault(x => x.Value == hd.crop.rowInSpriteSheet).Key;
-                        var c = crops.FirstOrDefault(x => x.Name == key);
-                        if ( c != null ) // Non-JA crop
-                            hd.crop.indexOfHarvest.Value = ResolveObjectId(c.Product);
+                        if (fixId(oldCropIds, cropIds, hd.crop.rowInSpriteSheet, Game1.content.Load<Dictionary<int, string>>("Data\\Crops")))
+                            hd.crop = null;
+                        else
+                        {
+                            var key = cropIds.FirstOrDefault(x => x.Value == hd.crop.rowInSpriteSheet).Key;
+                            var c = crops.FirstOrDefault(x => x.Name == key);
+                            if (c != null) // Non-JA crop
+                                hd.crop.indexOfHarvest.Value = ResolveObjectId(c.Product);
+                        }
                     }
-                }
-                else if ( tf.First().Value is FruitTree ft )
-                {
-                    if (fixId(oldFruitTreeIds, fruitTreeIds, ft.treeType, Game1.content.Load<Dictionary<int, string>>("Data\\fruitTrees")))
-                        toRemove.Add(tf.First().Key);
-                    else
+                    else if (tf.First().Value is FruitTree ft)
                     {
-                        var key = oldFruitTreeIds.FirstOrDefault(x => x.Value == ft.treeType).Key;
-                        var ftt = fruitTrees.FirstOrDefault(x => x.Name == key);
-                        if ( ftt != null ) // Non-JA fruit tree
-                            ft.indexOfFruit.Value = ResolveObjectId(ftt.Product);
+                        if (fixId(oldFruitTreeIds, fruitTreeIds, ft.treeType, Game1.content.Load<Dictionary<int, string>>("Data\\fruitTrees")))
+                            toRemove.Add(tf.First().Key);
+                        else
+                        {
+                            var key = oldFruitTreeIds.FirstOrDefault(x => x.Value == ft.treeType).Key;
+                            var ftt = fruitTrees.FirstOrDefault(x => x.Name == key);
+                            if (ftt != null) // Non-JA fruit tree
+                                ft.indexOfFruit.Value = ResolveObjectId(ftt.Product);
+                        }
                     }
                 }
             }
@@ -526,28 +529,31 @@ namespace JsonAssets
             toRemove.Clear();
             foreach ( var obj in loc.objects )
             {
-                if ( obj.First().Value is Chest chest )
+                if (obj.Count > 0)
                 {
-                    fixItemList(chest.items);
-                }
-                else
-                {
-                    if (!obj.First().Value.bigCraftable)
+                    if (obj.First().Value is Chest chest)
                     {
-                        if (fixId(oldObjectIds, objectIds, obj.First().Value.parentSheetIndex, Game1.objectInformation))
-                            toRemove.Add(obj.First().Key);
+                        fixItemList(chest.items);
                     }
                     else
                     {
-                        if (fixId(oldBigCraftableIds, bigCraftableIds, obj.First().Value.parentSheetIndex, Game1.bigCraftablesInformation))
-                            toRemove.Add(obj.First().Key);
+                        if (!obj.First().Value.bigCraftable)
+                        {
+                            if (fixId(oldObjectIds, objectIds, obj.First().Value.parentSheetIndex, Game1.objectInformation))
+                                toRemove.Add(obj.First().Key);
+                        }
+                        else
+                        {
+                            if (fixId(oldBigCraftableIds, bigCraftableIds, obj.First().Value.parentSheetIndex, Game1.bigCraftablesInformation))
+                                toRemove.Add(obj.First().Key);
+                        }
                     }
-                }
-                
-                if ( obj.First().Value.heldObject.Value != null )
-                {
-                    if (fixId(oldObjectIds, objectIds, obj.First().Value.heldObject.First().parentSheetIndex, Game1.objectInformation))
-                        obj.First().Value.heldObject.Value = null;
+
+                    if (obj.First().Value.heldObject.Value != null)
+                    {
+                        if (fixId(oldObjectIds, objectIds, obj.First().Value.heldObject.First().parentSheetIndex, Game1.objectInformation))
+                            obj.First().Value.heldObject.Value = null;
+                    }
                 }
             }
             foreach (var rem in toRemove)
