@@ -494,7 +494,7 @@ namespace JsonAssets
             {
                 if (tf.Count > 0)
                 {
-                    if (tf.First().Value is HoeDirt hd)
+                    if (tf.Last().Value is HoeDirt hd)
                     {
                         if (hd.crop == null)
                             continue;
@@ -503,20 +503,20 @@ namespace JsonAssets
                             hd.crop = null;
                         else
                         {
-                            var key = cropIds.FirstOrDefault(x => x.Value == hd.crop.rowInSpriteSheet).Key;
-                            var c = crops.FirstOrDefault(x => x.Name == key);
+                            var key = cropIds.Last(x => x.Value == hd.crop.rowInSpriteSheet).Key;
+                            var c = crops.Last(x => x.Name == key);
                             if (c != null) // Non-JA crop
                                 hd.crop.indexOfHarvest.Value = ResolveObjectId(c.Product);
                         }
                     }
-                    else if (tf.First().Value is FruitTree ft)
+                    else if (tf.Last().Value is FruitTree ft)
                     {
                         if (fixId(oldFruitTreeIds, fruitTreeIds, ft.treeType, Game1.content.Load<Dictionary<int, string>>("Data\\fruitTrees")))
-                            toRemove.Add(tf.First().Key);
+                            toRemove.Add(tf.Last().Key);
                         else
                         {
-                            var key = oldFruitTreeIds.FirstOrDefault(x => x.Value == ft.treeType).Key;
-                            var ftt = fruitTrees.FirstOrDefault(x => x.Name == key);
+                            var key = oldFruitTreeIds.Last(x => x.Value == ft.treeType).Key;
+                            var ftt = fruitTrees.Last(x => x.Name == key);
                             if (ftt != null) // Non-JA fruit tree
                                 ft.indexOfFruit.Value = ResolveObjectId(ftt.Product);
                         }
@@ -531,28 +531,28 @@ namespace JsonAssets
             {
                 if (obj.Count > 0)
                 {
-                    if (obj.First().Value is Chest chest)
+                    if (obj.Last().Value is Chest chest)
                     {
                         fixItemList(chest.items);
                     }
                     else
                     {
-                        if (!obj.First().Value.bigCraftable)
+                        if (!obj.Last().Value.bigCraftable)
                         {
-                            if (fixId(oldObjectIds, objectIds, obj.First().Value.parentSheetIndex, Game1.objectInformation))
-                                toRemove.Add(obj.First().Key);
+                            if (fixId(oldObjectIds, objectIds, obj.Last().Value.parentSheetIndex, Game1.objectInformation))
+                                toRemove.Add(obj.Last().Key);
                         }
                         else
                         {
-                            if (fixId(oldBigCraftableIds, bigCraftableIds, obj.First().Value.parentSheetIndex, Game1.bigCraftablesInformation))
-                                toRemove.Add(obj.First().Key);
+                            if (fixId(oldBigCraftableIds, bigCraftableIds, obj.Last().Value.parentSheetIndex, Game1.bigCraftablesInformation))
+                                toRemove.Add(obj.Last().Key);
                         }
                     }
 
-                    if (obj.First().Value.heldObject.Value != null)
+                    if (obj.Last().Value.heldObject.Value != null)
                     {
-                        if (fixId(oldObjectIds, objectIds, obj.First().Value.heldObject.First().parentSheetIndex, Game1.objectInformation))
-                            obj.First().Value.heldObject.Value = null;
+                        if (fixId(oldObjectIds, objectIds, obj.Last().Value.heldObject.Last().parentSheetIndex, Game1.objectInformation))
+                            obj.Last().Value.heldObject.Value = null;
                     }
                 }
             }
@@ -602,7 +602,7 @@ namespace JsonAssets
             if (oldIds.Values.Contains(id))
             {
                 int id_ = id;
-                var key = oldIds.FirstOrDefault(x => x.Value == id_).Key;
+                var key = oldIds.Last(x => x.Value == id_).Key;
 
                 if (newIds.ContainsKey(key))
                 {
