@@ -503,10 +503,15 @@ namespace JsonAssets
                             hd.crop = null;
                         else
                         {
-                            var key = cropIds.Last(x => x.Value == hd.crop.rowInSpriteSheet).Key;
-                            var c = crops.Last(x => x.Name == key);
-                            if (c != null) // Non-JA crop
-                                hd.crop.indexOfHarvest.Value = ResolveObjectId(c.Product);
+                            try
+                            {
+                                var key = cropIds.Last(x => x.Value == hd.crop.rowInSpriteSheet).Key;
+                                var c = crops.Last(x => x.Name == key);
+                                if (c != null) // Non-JA crop
+                                    hd.crop.indexOfHarvest.Value = ResolveObjectId(c.Product);
+                            }
+                            catch { continue; }
+                            
                         }
                     }
                     else if (tf.Last().Value is FruitTree ft)
