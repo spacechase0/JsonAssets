@@ -29,7 +29,7 @@
 * [Context Tags](#context-tags)
 * [Localization](#localization)
 * [Content Patcher API](#content-patcher-api)
-* [Tokens in Fields](tokens-in-fields)
+* [Tokens in Fields](#tokens-in-fields)
 * [Converting From Legacy Format](#converting-from-legacy-format)
 * [Releasing A Content Pack](#releasing-a-content-pack)
   * [Manifest](#manifest)
