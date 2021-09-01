@@ -330,7 +330,7 @@ field                  | purpose
 `EdibleIsDrink`        | Set to `true` or `false`.
 `EdibleBuffs`          | Either set to `null` or include **all** required valid fields. It will not work if you only use the needed fields. Set unused fields to 0. Supports negative values. Required valid fields: `Farming`, `Fishing`, `Mining`, `Luck`, `Duration`. Optional valid fields: `Foraging`, `MaxStamina`, `MagnetRadius`, `Speed`, `Defense`, `Attack`.
 `IsColored`            | Set to `false`.
-`Recipe`               | Begins the recipe block.
+`Recipe`               | Begins the recipe block. The following fields must go inside the recipe block:
 `ResultCount`          | How many of the product does the recipe produce.
 `Ingredients`          | You can use either the item ID or the name of the object. 
 `Object` & `Count`     | Fields that are part of `Ingredients`. You can add up to five different ingredients to a recipe. You can use either the item ID or the name of the object. `Object` fields that contain a negative value are the generic ID. Example: Rather than using a specific milk, -6 allows for any milk to be used.
